@@ -1,0 +1,52 @@
+{
+  "name": "@brijeshb42/styling-engine-context",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsup"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "next": "*"
+  },
+  "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "next": "^15.1.7",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "react-server": {
+        "import": "./dist/index-server.mjs",
+        "require": "./dist/index-server.js"
+      },
+      "default": {
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.js"
+      }
+    },
+    "./getValue": {
+      "types": "./dist/getValue.d.ts",
+      "import": "./dist/getValue.mjs",
+      "default": "./dist/getValue.js"
+    },
+    "./getValueNextjs": {
+      "types": "./dist/getValue.d.ts",
+      "import": "./dist/getValueNextjs.mjs",
+      "default": "./dist/getValueNextjs.js"
+    }
+  }
+}
