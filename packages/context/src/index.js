@@ -1,8 +1,9 @@
-import * as React from "react";
+'use client';
+import * as React from 'react';
 
 const Context = React.createContext(null);
 
-export const Provider = Context.Provider;
+export const ContextProvider = Context.Provider;
 
 export function useContext() {
   return React.useContext(Context);

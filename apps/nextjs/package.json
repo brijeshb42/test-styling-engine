@@ -3,17 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "copy-config": "cp src/joy-config.ts node_modules/@joy/joy-ui/dist/nextjs-config.mjs",
+    "dev": "pnpm copy-config && next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "@brijeshb42/styling-engine-context": "workspace:*",
-    "@brijeshb42/styling-engine": "workspace:*",
+    "@joy/styling-engine-context": "workspace:*",
+    "@joy/styling-engine": "workspace:*",
+    "@joy/joy-ui": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.1.7"
+    "next": "15.2.0"
   },
   "devDependencies": {
     "typescript": "^5",

@@ -3,7 +3,7 @@
     "module": "esnext",
     // aligning with Node18 recommendation: https://www.npmjs.com/package/@tsconfig/node18
     "target": "es2022",
-    "lib": ["es2020", "dom", "ES2021.String"],
+    "lib": ["es2020", "dom", "ES2021.String", "DOM.Iterable"],
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
     "forceConsistentCasingInFileNames": true,
@@ -15,8 +15,15 @@
     "noErrorTruncation": false,
     "allowJs": true,
     "paths": {
-      "@brijeshb42/styling-engine": ["./packages/engine/src"],
-      "@brijeshb42/styling-engine/*": ["./packages/engine/src/*"]
+      "@joy/styling-engine-context": ["./packages/context/src"],
+      "@joy/styling-engine-context/*": ["./packages/context/src/*"],
+      "@joy/styling-engine": ["./packages/engine/src"],
+      "@joy/styling-engine/*": ["./packages/engine/src/*"],
+      "@joy/styling-engine-babel-plugin": [
+        "./packages/engine-babel-plugin/src"
+      ],
+      "@joy/joy-ui": ["./packages/joy/src"],
+      "@joy/joy-ui/*": ["./packages/joy/src/*"]
     },
     // Otherwise we get react-native typings which conflict with dom.lib.
     "types": ["node", "react"]

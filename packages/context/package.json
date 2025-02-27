@@ -1,5 +1,5 @@
 {
-  "name": "@brijeshb42/styling-engine-context",
+  "name": "@joy/styling-engine-context",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -27,6 +27,7 @@
     "@types/react-dom": "^19.0.4"
   },
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "types": "./dist/index.d.ts",
       "react-server": {

@@ -1,18 +1,11 @@
-import { Style } from "@brijeshb42/styling-engine";
-import styles from "./page.module.css";
+import { Button } from '@joy/joy-ui';
 
-const btnStyle = (
-  <Style href="button" precedence="components">
-    {`.button {
-    color: red;
-  }`}
-  </Style>
-);
+import styles from './page.module.css';
 
 export default function Home() {
+  console.log('Render Page');
   return (
     <div className={styles.page}>
-      {btnStyle}
       <main className={styles.main}>
         <ol>
           <li>
@@ -38,6 +31,8 @@ export default function Home() {
           >
             Read our docs
           </a>
+          <Button>Test Button</Button>
+          <Button>Test Button 2</Button>
         </div>
       </main>
       <footer className={styles.footer}>

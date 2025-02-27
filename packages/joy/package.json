@@ -1,0 +1,62 @@
+{
+  "name": "@joy/joy-ui",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build:esm": "babel src --out-dir dist --extensions .ts,.tsx --out-file-extension .mjs",
+    "build:cjs": "babel src --out-dir dist --extensions .ts,.tsx --out-file-extension .js",
+    "build:types": "tsup",
+    "build": "tsup"
+  },
+  "dependencies": {
+    "@joy/styling-engine": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@babel/core": "^7.26.9",
+    "@babel/cli": "^7.26.4",
+    "@babel/plugin-transform-react-jsx": "^7.25.9",
+    "@babel/plugin-transform-typescript": "^7.26.8",
+    "@joy/styling-engine-babel-plugin": "workspace:*",
+    "@styled/typescript-styled-plugin": "^1.0.1",
+    "@types/babel__core": "^7.20.5"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": {
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.js"
+      }
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "default": {
+        "import": "./dist/config.mjs",
+        "require": "./dist/config.js"
+      }
+    },
+    "./base-config": {
+      "types": "./dist/base-config.d.ts",
+      "default": {
+        "import": "./dist/base-config.mjs",
+        "require": "./dist/base-config.js"
+      }
+    },
+    "./nextjs-config": {
+      "types": "./dist/base-config.d.ts",
+      "default": {
+        "import": "./dist/nextjs-config.mjs"
+      }
+    }
+  }
+}

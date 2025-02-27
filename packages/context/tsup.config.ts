@@ -1,13 +1,13 @@
-import { defineConfig } from "tsup";
-import config from "../../tsup.config";
+import { defineConfig } from 'tsup';
+import config from '../../tsup.config';
 
 export default defineConfig({
   ...config,
   entry: [
-    "src/index.js",
-    "src/index-server.js",
-    "src/getValue.js",
-    "src/getValueNextjs.js",
+    'src/index.js',
+    'src/index-server.js',
+    'src/getValue.js',
+    'src/getValueNextjs.js',
   ],
-  external: ["@brijeshb42/styling-engine-context/getValue"],
+  external: ['@joy/styling-engine-context/getValue'],
 });

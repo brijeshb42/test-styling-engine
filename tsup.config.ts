@@ -23,7 +23,7 @@ export default defineConfig({
   clean: true,
   format: ["cjs", "esm"],
   treeshake: true,
-  cjsInterop: true,
+  cjsInterop: false,
   dts: true,
   silent: true,
   banner: {

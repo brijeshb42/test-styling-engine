@@ -1,13 +1,12 @@
 {
-  "name": "@brijeshb42/styling-engine",
+  "name": "@joy/styling-engine",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "build": "tsup"
   },
   "dependencies": {
-    "@brijeshb42/styling-engine-context": "workspace:*"
+    "@joy/styling-engine-context": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.0.0",
@@ -23,6 +22,7 @@
   "author": "",
   "license": "MIT",
   "exports": {
+    "./package.json": "./package.json",
     ".": {
       "react-server": {
         "import": "./dist/index-server.mjs",
@@ -32,6 +32,18 @@
       "default": {
         "import": "./dist/index.mjs",
         "require": "./dist/index.js"
+      }
+    },
+    "./Style": {
+      "react-server": {
+        "import": "./dist/Style-server.mjs",
+        "default": "./dist/Style-server.js",
+        "node": "./dist/Style-server.js"
+      },
+      "types": "./dist/Style.d.ts",
+      "default": {
+        "import": "./dist/Style.mjs",
+        "require": "./dist/Style.js"
       }
     }
   }
