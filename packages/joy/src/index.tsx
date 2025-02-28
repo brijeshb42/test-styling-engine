@@ -279,12 +279,6 @@ const buttonStyles = css`
     &:disabled {
       cursor: var(--cursor-disabled);
     }
-
-    @media (--xs) and (--lg) {
-      .xs\:mui-b {
-        bottom: var(--b-xs);
-      }
-    }
   }
 `;
 
@@ -293,8 +287,6 @@ type ButtonProps = React.ComponentPropsWithRef<'button'>;
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (props, forwardedRef) => {
     const { className, ...rest } = props;
-
-    console.log('Render button');
 
     return (
       <button

@@ -68,21 +68,82 @@ function findSeparatorPositions(text: string) {
   return positions;
 }
 
+/**
+ * Splits the string wherever a (--__breakpoint_query_placeholder__(name)) is found and
+ * returns an interpolation to import breakpoint value at runtime.
+ *
+ * @example
+ * ```js
+ * const css = '@media (--__breakpoint_query_placeholder__xs) and (--__breakpoint_query_placeholder__lg) {}
+ * ```
+ *
+ * becomes
+ *
+ * ```js
+ * import { breakpoints } from 'import-to/config';
+ *
+ * const css = 'm
+ */
 function processRegularString(
-  babel: Core,
+  { types: t, addNamedImport }: Core,
   str: string
 ): ReturnType<
-  Core['types']['stringLiteral'] | Core['types']['binaryExpression']
+  Core['types']['templateLiteral'] | Core['types']['stringLiteral']
 > {
-  const matches =
-    /(\(--__breakpoint_query_placeholder__(?<name>[a-z]+)\))/g.exec(str);
-  if (!matches) {
-    return babel.types.stringLiteral(str);
-  }
-  const breakpointsImport = babel.addNamedImport('breakpoints');
+  const regex = /(\(--__breakpoint_query_placeholder__(?<name>[a-z]+)\))/g;
 
-  console.log(matches);
-  return babel.types.stringLiteral(str);
+  // Split the string by the pattern
+  let result: (string | { breakpoint: string })[] = [];
+  let lastIndex = 0;
+  let match;
+
+  // Use exec to iterate through all matches
+  while ((match = regex.exec(str)) !== null) {
+    // Add the text before the match
+    if (match.index > lastIndex) {
+      result.push(str.substring(lastIndex, match.index));
+    }
+
+    // Add the captured group (the breakpoint name)
+
+    if (match.groups?.name) {
+      result.push({
+        breakpoint: match.groups.name,
+      });
+    }
+
+    // Update lastIndex to continue after this match
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add any remaining text after the last match
+  if (lastIndex < str.length) {
+    result.push(str.substring(lastIndex));
+  }
+
+  if (!result.length || result.length === 1) {
+    return t.stringLiteral(str);
+  }
+
+  const templateElements: ReturnType<Core['types']['templateElement']>[] = [];
+  const expressions: ReturnType<Core['types']['memberExpression']>[] = [];
+
+  result.forEach((item) => {
+    if (typeof item === 'string') {
+      templateElements.push(t.templateElement({ raw: item }));
+      return;
+    }
+    const breakpointsImport = addNamedImport('breakpoints');
+    expressions.push(
+      t.memberExpression(
+        breakpointsImport,
+        t.stringLiteral(item.breakpoint),
+        true
+      )
+    );
+  });
+
+  return t.templateLiteral(templateElements, expressions);
 }
 
 function processBreakpointString(
@@ -165,6 +226,7 @@ function concatenateStrings(babel: Core, items: SeparatedCssItem[]) {
     },
     t.stringLiteral('') as
       | ReturnType<Core['types']['stringLiteral']>
+      | ReturnType<Core['types']['templateLiteral']>
       | ReturnType<Core['types']['binaryExpression']>
   );
 }
