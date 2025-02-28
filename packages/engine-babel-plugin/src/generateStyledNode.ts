@@ -160,22 +160,40 @@ function processBreakpointString(
   Core['types']['stringLiteral'] | Core['types']['callExpression']
 > {
   const { types: t } = babel;
-  const cssString = str.split(PLACEHOLDERS.BREAKPOINT_PLACEHOLDER);
+  let cssString = str.split(PLACEHOLDERS.BREAKPOINT_PLACEHOLDER);
   const breakpointsImport = babel.addNamedImport('breakpoints');
   if (cssString.length === 1) {
     return t.stringLiteral(cssString[0]);
   }
   const breakpointValueId = t.identifier('value');
   const breakpointKeyId = t.identifier('key');
-  const expressions: ReturnType<Core['types']['identifier']>[] = [];
+  const breakpointWithSlash = t.identifier('ks');
+  const expressions: ReturnType<
+    Core['types']['binaryExpression' | 'identifier']
+  >[] = [breakpointValueId];
+
   for (let i = 0; i < cssString.length - 1; i++) {
-    expressions.push(breakpointKeyId);
+    expressions.push(breakpointWithSlash);
   }
+  cssString = cssString.map((str, index) => {
+    if (index === 0) {
+      return `{ ${str}`;
+    }
+    if (index === cssString.length - 1) {
+      return `${str} }`;
+    }
+    return str;
+  });
   const templateElement = t.templateLiteral(
-    cssString.map((content) => t.templateElement({ raw: content })),
+    ['@media ', ...cssString].map((content) =>
+      t.templateElement({ raw: content })
+    ),
     expressions
   );
 
+  /**
+   * Maybe we can generate a more optimized code.
+   */
   return t.callExpression(
     t.memberExpression(
       t.callExpression(
@@ -194,13 +212,19 @@ function processBreakpointString(
               t.memberExpression(breakpointsImport, breakpointKeyId, true)
             ),
           ]),
+          t.variableDeclaration('const', [
+            t.variableDeclarator(
+              breakpointWithSlash,
+              t.binaryExpression('+', breakpointKeyId, t.stringLiteral('\\'))
+            ),
+          ]),
           t.returnStatement(
             t.binaryExpression('+', t.identifier('acc'), templateElement)
           ),
         ])
       ),
       t.stringLiteral(
-        str.replaceAll(`.${PLACEHOLDERS.BREAKPOINT_PLACEHOLDER}`, '')
+        str.replaceAll(`${PLACEHOLDERS.BREAKPOINT_PLACEHOLDER}\\:`, '')
       ),
     ]
   );
@@ -245,7 +269,11 @@ function concatenateStrings(babel: Core, items: SeparatedCssItem[]) {
  */
 function generateCssWithoutSeparators(babel: Core, cssString: string) {
   const positions = findSeparatorPositions(cssString);
-  if (positions.length === 0) return babel.types.stringLiteral(cssString);
+  if (positions.length === 0)
+    return {
+      hash: hashString(cssString),
+      result: processRegularString(babel, cssString),
+    };
   if (positions.length % 2 !== 0) {
     throw new Error(
       `Unbalanced separators. Please check the input/output css. ${cssString}`
@@ -253,23 +281,40 @@ function generateCssWithoutSeparators(babel: Core, cssString: string) {
   }
   const separatedCss: SeparatedCssItem[] = [];
   let lastStartPosition: SeparatorPosition | null = null;
+  let lastEndPostition: SeparatorPosition | null = null;
 
   separatedCss.push({
     type: 'regular',
     content: cssString.slice(0, positions[0].separator),
   });
 
-  for (const { type, separator, closingBrace } of positions) {
-    if (type === 'start') {
-      lastStartPosition = { type, separator, closingBrace };
+  for (const position of positions) {
+    if (position.type === 'start') {
+      lastStartPosition = position;
+
+      if (lastEndPostition) {
+        separatedCss.push({
+          type: 'regular',
+          content: cssString.slice(
+            lastEndPostition.closingBrace + 1,
+            position.separator
+          ),
+        });
+      }
     }
-    if (type === 'end') {
+    if (position.type === 'end') {
       if (!lastStartPosition) {
         throw new Error('Found separator end without a start');
       }
+
+      lastEndPostition = position;
+
       separatedCss.push({
         type: 'separator',
-        content: cssString.slice(lastStartPosition.closingBrace + 1, separator),
+        content: cssString.slice(
+          lastStartPosition.closingBrace + 1,
+          position.separator
+        ),
       });
       lastStartPosition = null;
     }
@@ -284,7 +329,12 @@ function generateCssWithoutSeparators(babel: Core, cssString: string) {
     content: cssString.slice(positions[positions.length - 1].closingBrace + 1),
   });
 
-  return concatenateStrings(babel, separatedCss);
+  const result = concatenateStrings(babel, separatedCss);
+  const hash = hashString(separatedCss.map((s) => s.content).join(''));
+  return {
+    hash,
+    result,
+  };
 }
 
 /**
@@ -299,10 +349,11 @@ export function generateStyledNode(
   const { types: t } = babel;
   const { href, precedence = 'mui-components' } = options ?? {};
   const transformedCss = generateCss(css, filename);
-  const cssStringAST = generateCssWithoutSeparators(babel, transformedCss);
+  const { hash: relevantHash, result: cssStringAST } =
+    generateCssWithoutSeparators(babel, transformedCss);
   const styleIdentifier = babel.addNamedStyleImport('Style');
 
-  const hash = href || hashString(transformedCss);
+  const hash = href || relevantHash;
   const styleElement = t.jsxIdentifier(styleIdentifier.name);
 
   const styleOpening = t.jsxOpeningElement(

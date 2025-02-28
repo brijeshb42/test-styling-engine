@@ -120,9 +120,18 @@ export function generateCss(
                 return;
               }
               style.value.selectors.forEach((selector) => {
-                selector.push({
-                  type: 'class',
-                  name: '__breakpoint_placeholder__',
+                if (selector.length > 2) {
+                  throw new Error(
+                    'Found more than one variant selector. "@breakpoints" does not support compound props yet'
+                  );
+                }
+                selector.forEach((sel, index) => {
+                  if (index === 0) {
+                    return;
+                  }
+                  if (sel.type === 'class') {
+                    sel.name = `__breakpoint_placeholder__:${sel.name}`;
+                  }
                 });
               });
             });
