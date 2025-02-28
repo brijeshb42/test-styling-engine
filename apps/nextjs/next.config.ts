@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
         '@joy/styling-engine-context/getValue':
           '@joy/styling-engine-context/getValueNextjs',
         // Works after copying the file to node_modules
-        '@joy/joy-ui/config': '@joy/joy-ui/nextjs-config',
+        // '@joy/joy-ui/config': '@joy/joy-ui/nextjs-config',
       },
     },
   },

@@ -3,7 +3,6 @@ import { Button } from '@joy/joy-ui';
 import styles from './page.module.css';
 
 export default function Home() {
-  console.log('Render Page');
   return (
     <div className={styles.page}>
       <main className={styles.main}>
