@@ -19,10 +19,17 @@ async function transform(input: string) {
   return res?.code;
 }
 
-test.each([
-  {
-    message: 'should transform @breakpoints 1',
-    input: `import { css } from 'styling-engine';
+async function transformAndFormat(code: string) {
+  const result = await transform(code);
+  return prettierFormat(result as string, {
+    singleQuote: true,
+    trailingComma: 'es5',
+    parser: 'babel',
+  });
+}
+
+test('should transform @breakpoints', async () => {
+  const result = await transformAndFormat(`import { css } from 'styling-engine';
 
   const res = css\`
     .mui-button {
@@ -37,11 +44,30 @@ test.each([
         }
       }
     }
-  \``,
-  },
-  {
-    message: 'should transform @breakpoints 2',
-    input: `import { css } from 'styling-engine';
+  \``);
+  expect(result).toMatchInlineSnapshot(`
+    "import { Style as _Style } from 'styling-engine/Style';
+    import { breakpoints as _breakpoints } from 'styling-engine/config';
+    const res = (
+      <_Style href="x68wlg" precedence="mui-components">
+        {'.mui-button{color:red}' +
+          Object.keys(_breakpoints).reduce((acc, key) => {
+            const value = _breakpoints[key];
+            const ks = key + '\\\\';
+            return (
+              acc +
+              \`@media \${value}{ .mui-button.\${ks}\\:size-1{padding:var(--size-1)}.mui-button.\${ks}\\:size-2{padding:var(--size-2)} }\`
+            );
+          }, '.mui-button.size-1{padding:var(--size-1)}.mui-button.size-2{padding:var(--size-2)}') +
+          ''}
+      </_Style>
+    );
+    "
+  `);
+});
+
+test('should transform @breakpoints without the nested selector reference', async () => {
+  const result = await transformAndFormat(`import { css } from 'styling-engine';
 
   const res = css\`
     .mui-button {
@@ -56,11 +82,30 @@ test.each([
         padding: var(--size-2);
       }
     }
-  \``,
-  },
-  {
-    message: 'should transform multiple @breakpoints',
-    input: `import { css } from 'styling-engine';
+  \``);
+  expect(result).toMatchInlineSnapshot(`
+    "import { Style as _Style } from 'styling-engine/Style';
+    import { breakpoints as _breakpoints } from 'styling-engine/config';
+    const res = (
+      <_Style href="1vaz5xc" precedence="mui-components">
+        {'.mui-button{color:red}' +
+          Object.keys(_breakpoints).reduce((acc, key) => {
+            const value = _breakpoints[key];
+            const ks = key + '\\\\';
+            return (
+              acc +
+              \`@media \${value}{ .mui-Button.\${ks}\\:size-1{padding:var(--size-1)}.mui-Button.\${ks}\\:size-2{padding:var(--size-2)} }\`
+            );
+          }, '.mui-Button.size-1{padding:var(--size-1)}.mui-Button.size-2{padding:var(--size-2)}') +
+          ''}
+      </_Style>
+    );
+    "
+  `);
+});
+
+test('should transform multiple @breakpoints references', async () => {
+  const result = await transformAndFormat(`import { css } from 'styling-engine';
 
   const res = css\`
     .mui-button {
@@ -89,11 +134,38 @@ test.each([
         color: #08c;
       }
     }
-  \``,
-  },
-  {
-    message: 'should transform custom media query 1',
-    input: `import { css } from 'styling-engine';
+  \``);
+  expect(result).toMatchInlineSnapshot(`
+    "import { Style as _Style } from 'styling-engine/Style';
+    import { breakpoints as _breakpoints } from 'styling-engine/config';
+    const res = (
+      <_Style href="ttnix3" precedence="mui-components">
+        {'.mui-button{color:red}' +
+          Object.keys(_breakpoints).reduce((acc, key) => {
+            const value = _breakpoints[key];
+            const ks = key + '\\\\';
+            return (
+              acc +
+              \`@media \${value}{ .mui-button.\${ks}\\:size-1{padding:var(--size-1)}.mui-button.\${ks}\\:size-2{padding:var(--size-2)} }\`
+            );
+          }, '.mui-button.size-1{padding:var(--size-1)}.mui-button.size-2{padding:var(--size-2)}') +
+          '.mui-button:disabled{color:gray}' +
+          Object.keys(_breakpoints).reduce((acc, key) => {
+            const value = _breakpoints[key];
+            const ks = key + '\\\\';
+            return (
+              acc + \`@media \${value}{ .mui-button.\${ks}\\:variant-1{color:green} }\`
+            );
+          }, '.mui-button.variant-1{color:green}') +
+          '.mui-button:active{color:#08c}'}
+      </_Style>
+    );
+    "
+  `);
+});
+
+test('should transform custom media query', async () => {
+  const result = await transformAndFormat(`import { css } from 'styling-engine';
 
     const res = css\`
       .mui-button {
@@ -112,25 +184,45 @@ test.each([
           padding: var(--size-2);
         }
       }
-    \``,
-  },
-  {
-    message: 'should transform custom media query at the start',
-    input: `import { css } from 'styling-engine';
+    \``);
+  expect(result).toMatchInlineSnapshot(`
+    "import { Style as _Style } from 'styling-engine/Style';
+    import { breakpoints as _breakpoints } from 'styling-engine/config';
+    const res = (
+      <_Style href="zorwtt" precedence="mui-components">
+        {\`.mui-button{color:red}@media \${_breakpoints['xs']}{.mui-button{color:#00f}}\` +
+          Object.keys(_breakpoints).reduce((acc, key) => {
+            const value = _breakpoints[key];
+            const ks = key + '\\\\';
+            return (
+              acc +
+              \`@media \${value}{ .mui-Button.\${ks}\\:size-1{padding:var(--size-1)}.mui-Button.\${ks}\\:size-2{padding:var(--size-2)} }\`
+            );
+          }, '.mui-Button.size-1{padding:var(--size-1)}.mui-Button.size-2{padding:var(--size-2)}') +
+          ''}
+      </_Style>
+    );
+    "
+  `);
+});
+
+test('should transform custom media query at the start', async () => {
+  const result = await transformAndFormat(`import { css } from 'styling-engine';
 
   const res = css\`@media (--xs) {
     .mui-Button {
       color: blue;
     }
-  }\``,
-  },
-])('$message', async ({ input }) => {
-  const result = await transform(input);
-  expect(
-    await prettierFormat(result as string, {
-      singleQuote: true,
-      trailingComma: 'es5',
-      parser: 'babel',
-    })
-  ).toMatchSnapshot();
+  }\``);
+  expect(result).toMatchInlineSnapshot(`
+    "import { Style as _Style } from 'styling-engine/Style';
+    import { breakpoints as _breakpoints } from 'styling-engine/config';
+    const res = (
+      <_Style
+        href="153s0vy"
+        precedence="mui-components"
+      >{\`@media \${_breakpoints['xs']}{.mui-Button{color:#00f}}\`}</_Style>
+    );
+    "
+  `);
 });
