@@ -291,9 +291,10 @@ export function generateStyledNode(
   const styleIdentifier = babel.addNamedStyleImport('Style');
 
   const hash = href || hashString(transformedCss);
+  const styleElement = t.jsxIdentifier(styleIdentifier.name);
 
   const styleOpening = t.jsxOpeningElement(
-    t.jsxIdentifier(styleIdentifier.name),
+    styleElement,
     [
       t.jsxAttribute(t.jsxIdentifier('href'), t.stringLiteral(hash)),
       t.jsxAttribute(
@@ -305,7 +306,7 @@ export function generateStyledNode(
   );
   const styleTag = t.jsxElement(
     styleOpening,
-    t.jsxClosingElement(t.jsxIdentifier('style')),
+    t.jsxClosingElement(styleElement),
     [t.jsxExpressionContainer(concatednatedStrings)]
   );
   return styleTag;

@@ -11,7 +11,7 @@ const babelPlugin: Exclude<Options['esbuildPlugins'], undefined>[number] = {
     build.onLoad({ filter: /\.tsx?$/ }, async ({ path: filePath }) => {
       const content = await fs.readFile(filePath, 'utf-8');
       const opts = loadOptions({
-        babelrc: false,
+        babelrc: true,
         plugins: [
           [
             '@babel/plugin-transform-typescript',
