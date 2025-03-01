@@ -120,7 +120,8 @@ export default function stylingEnginePlugin(
             },
             cssStr,
             userOptions,
-            state.filename
+            state.filename,
+            node.node.loc
           )
         );
       },

@@ -97,6 +97,9 @@ importers:
 
   packages/engine-babel-plugin:
     dependencies:
+      '@babel/code-frame':
+        specifier: ^7.26.2
+        version: 7.26.2
       '@babel/core':
         specifier: 7.26.9
         version: 7.26.9
@@ -110,6 +113,9 @@ importers:
         specifier: ^1.29.1
         version: 1.29.1
     devDependencies:
+      '@types/babel__code-frame':
+        specifier: ^7.0.6
+        version: 7.0.6
       '@types/babel__core':
         specifier: ^7.20.5
         version: 7.20.5
@@ -971,6 +977,9 @@ packages:
 
   '@tybys/wasm-util@0.9.0':
     resolution: {integrity: sha512-6+7nlbMVX/PVDCwaIQ8nTOPveOcFLSt8GcXdx8hD0bt39uWxYT88uXzqTd4fTvqta7oeUJqudepapKNt2DYJFw==}
+
+  '@types/babel__code-frame@7.0.6':
+    resolution: {integrity: sha512-Anitqkl3+KrzcW2k77lRlg/GfLZLWXBuNgbEcIOU6M92yw42vsd3xV/Z/yAHEj8m+KUjL6bWOVOFqX8PFPJ4LA==}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -2866,6 +2875,8 @@ snapshots:
   '@tybys/wasm-util@0.9.0':
     dependencies:
       tslib: 2.8.1
+
+  '@types/babel__code-frame@7.0.6': {}
 
   '@types/babel__core@7.20.5':
     dependencies:

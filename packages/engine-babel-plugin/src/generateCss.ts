@@ -1,7 +1,111 @@
 import { transform, Features, Declaration } from 'lightningcss';
+import { codeFrameColumns } from '@babel/code-frame';
+
+export type Position = {
+  line: number;
+  column: number;
+};
 
 function generateRandomNumberBetween(min: number = 1, max: number = 1000) {
   return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+const UTILITY_RESPONSIVE_CLASS_NAMES: Record<string, string> = {
+  // Utilities
+  'align-content': 'ac',
+  'align-items': 'ai',
+  'align-self': 'as',
+  bottom: 'b',
+  'column-gap': 'cg',
+  display: 'd',
+  'flex-basis': 'fb',
+  'flex-direction': 'fd',
+  'flex-grow': 'fg',
+  'flex-shrink': 'fs',
+  'flex-wrap': 'fw',
+  gap: 'g',
+  'grid-column-end': 'gce',
+  'grid-column-start': 'gcs',
+  'grid-row-end': 'gre',
+  'grid-row-start': 'grs',
+  'grid-template-columns': 'gtc',
+  'grid-template-rows': 'gtr',
+  height: 'h',
+  inset: 'i',
+  'justify-content': 'jc',
+  left: 'l',
+  'margin-bottom': 'mb',
+  'margin-left': 'ml',
+  'margin-right': 'mr',
+  'margin-top': 'mt',
+  'margin-x': 'mx',
+  'margin-y': 'my',
+  margin: 'm',
+  'max-height': 'max-h',
+  'max-width': 'max-w',
+  'min-height': 'min-h',
+  'min-width': 'min-w',
+  'overflow-x': 'ox',
+  'overflow-y': 'oy',
+  overflow: 'o',
+  'padding-bottom': 'pb',
+  'padding-left': 'pl',
+  'padding-right': 'pr',
+  'padding-top': 'pt',
+  'padding-x': 'px',
+  'padding-y': 'py',
+  padding: 'p',
+  position: 'pos',
+  right: 'r',
+  'row-gap': 'rg',
+  'text-align': 'ta',
+  'text-wrap': 'tw',
+  top: 't',
+  width: 'w',
+};
+
+const COMPONENT_PROPS_RESPONSIVE_CLASS_NAMES: Record<string, string> = {
+  // Component props
+  size: 'size',
+};
+
+export const PLACEHOLDERS = {
+  SEPARATOR_START: '#__separator-start',
+  SEPARATOR_END: '#__separator-end',
+  BREAKPOINT_PLACEHOLDER: '__breakpoint_placeholder__',
+};
+
+type GenerateCssOptions = {
+  supportsRuntime?: boolean;
+  prefix?: string;
+  utilityClasses?: Record<string, string>;
+  responsiveClasses?: Record<string, string>;
+  location?: {
+    start: Position;
+    end: Position;
+  } | null;
+};
+
+function generateError(
+  snippet: string,
+  message: string,
+  loc: { line: number; column: number }
+) {
+  return codeFrameColumns(
+    snippet,
+    {
+      start: {
+        line: loc.line + 1,
+        column: loc.column + 1,
+      },
+    },
+    {
+      highlightCode: true,
+      linesAbove: 2,
+      linesBelow: 2,
+      message,
+    }
+  );
 }
 
 /**
@@ -60,8 +164,15 @@ function generateRandomNumberBetween(min: number = 1, max: number = 1000) {
 export function generateCss(
   cssStr: string,
   filename: string = '',
-  supportsRuntime: boolean = true
+  options?: GenerateCssOptions
 ) {
+  const {
+    supportsRuntime = true,
+    prefix = 'mui',
+    utilityClasses = UTILITY_RESPONSIVE_CLASS_NAMES,
+    responsiveClasses = COMPONENT_PROPS_RESPONSIVE_CLASS_NAMES,
+    location,
+  } = options ?? {};
   const result = transform({
     minify: true,
     filename,
@@ -120,9 +231,32 @@ export function generateCss(
                 return;
               }
               style.value.selectors.forEach((selector) => {
+                /** Check for responsive utility classes */
+                if (selector.length === 1) {
+                  const classNameRegexp = new RegExp(
+                    `^(-?(${prefix}-)?(?:${Object.values(utilityClasses).join('|')})(?:-[a-z0-9]+)*(?![-a-z0-9]))`,
+                    'g'
+                  );
+                  if (selector[0].type !== 'class') {
+                    throw new Error(
+                      generateError(
+                        cssStr,
+                        `Only class selector is supported in @breakpoints. Found "${selector[0].type}" selector.`,
+                        style.value.loc
+                      )
+                    );
+                  }
+                  if (classNameRegexp.test(selector[0].name)) {
+                    selector[0].name = `${PLACEHOLDERS.BREAKPOINT_PLACEHOLDER}:${selector[0].name}`;
+                  }
+                }
                 if (selector.length > 2) {
                   throw new Error(
-                    'Found more than one variant selector. "@breakpoints" does not support compound props yet'
+                    generateError(
+                      cssStr,
+                      `Found more than one variant selector. "@breakpoints" does not support compound props yet.`,
+                      style.value.loc
+                    )
                   );
                 }
                 selector.forEach((sel, index) => {
@@ -130,7 +264,15 @@ export function generateCss(
                     return;
                   }
                   if (sel.type === 'class') {
-                    sel.name = `__breakpoint_placeholder__:${sel.name}`;
+                    const classNameRegexp = new RegExp(
+                      `(-?(?:${Object.values(responsiveClasses).join(
+                        '|'
+                      )})(?:-[a-z0-9]+)*(?![-a-z0-9]))`,
+                      'g'
+                    );
+                    if (classNameRegexp.test(sel.name)) {
+                      sel.name = `${PLACEHOLDERS.BREAKPOINT_PLACEHOLDER}:${sel.name}`;
+                    }
                   }
                 });
               });
@@ -159,7 +301,7 @@ export function generateCss(
                   [
                     {
                       type: 'id',
-                      name: `__separator-start-0${generateRandomNumberBetween()}`,
+                      name: `${PLACEHOLDERS.SEPARATOR_START.slice(1)}-0${generateRandomNumberBetween()}`,
                     },
                   ],
                 ],
@@ -178,7 +320,7 @@ export function generateCss(
                   [
                     {
                       type: 'id',
-                      name: `__separator-end-${generateRandomNumberBetween()}`,
+                      name: `${PLACEHOLDERS.SEPARATOR_END.slice(1)}-${generateRandomNumberBetween()}`,
                     },
                   ],
                 ],
