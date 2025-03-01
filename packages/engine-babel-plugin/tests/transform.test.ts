@@ -138,7 +138,7 @@ test('should transform multiple @breakpoints references', async () => {
     "import { Style as _Style } from 'styling-engine/Style';
     import { breakpoints as _breakpoints } from 'styling-engine/config';
     const res = (
-      <_Style href="vprizm" precedence="mui-components">
+      <_Style href="1qrqa6f" precedence="mui-components">
         {'.mui-button{color:red}' +
           Object.keys(_breakpoints).reduce(
             (acc, key) =>
@@ -147,7 +147,12 @@ test('should transform multiple @breakpoints references', async () => {
             '.mui-button.size-1{padding:var(--size-1)}.mui-button.size-2{padding:var(--size-2)}'
           ) +
           '.mui-button:disabled{color:gray}' +
-          '.mui-button.variant-1{color:green}' +
+          Object.keys(_breakpoints).reduce(
+            (acc, key) =>
+              acc +
+              \`@media \${_breakpoints[key]}{ .mui-button.\${key}\\\\\\:variant-1{color:green} }\`,
+            '.mui-button.variant-1{color:green}'
+          ) +
           '.mui-button:active{color:#08c}'}
       </_Style>
     );

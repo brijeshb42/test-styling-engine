@@ -67,6 +67,7 @@ const UTILITY_RESPONSIVE_CLASS_NAMES: Record<string, string> = {
 const COMPONENT_PROPS_RESPONSIVE_CLASS_NAMES: Record<string, string> = {
   // Component props
   size: 'size',
+  variant: 'variant',
 };
 
 export const PLACEHOLDERS = {
