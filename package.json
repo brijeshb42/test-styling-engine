@@ -14,11 +14,22 @@
   "devDependencies": {
     "@types/node": "^22.13.4",
     "@types/react": "^19.0.10",
-    "tsup": "^8.3.6",
     "nx": "20.4.6",
     "prettier": "^3.5.2",
+    "tsup": "^8.3.6",
     "typescript": "^5.7.3",
     "vitest": "^3.0.7"
   },
-  "packageManager": "pnpm@9.15.4"
+  "packageManager": "pnpm@9.15.4",
+  "overrides": {
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "react-dom": "patches/react-dom.patch",
+      "@emotion/sheet": "patches/@emotion__sheet.patch",
+      "@emotion/styled": "patches/@emotion__styled.patch"
+    }
+  }
 }

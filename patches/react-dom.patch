@@ -1,0 +1,14 @@
+diff --git a/cjs/react-dom-client.development.js b/cjs/react-dom-client.development.js
+index 83ea1c6a783efe2e674eda4b681eb361f000d12d..c84fe7324cba0e23d0ecc13cfb7cbe534ef1619e 100644
+--- a/cjs/react-dom-client.development.js
++++ b/cjs/react-dom-client.development.js
+@@ -19740,6 +19740,9 @@
+         ? prior.parentNode.insertBefore(instance, prior.nextSibling)
+         : ((precedence = 9 === root.nodeType ? root.head : root),
+           precedence.insertBefore(instance, precedence.firstChild));
++      performance.mark('Style_end', {
++        detail: instance.dataset.href
++      });
+     }
+     function adoptPreloadPropsForStylesheet(stylesheetProps, preloadProps) {
+       null == stylesheetProps.crossOrigin &&

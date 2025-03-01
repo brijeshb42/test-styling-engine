@@ -1,0 +1,12 @@
+diff --git a/dist/emotion-sheet.development.esm.js b/dist/emotion-sheet.development.esm.js
+index d7e942293977e93b7e47d403777354cfbec4c772..a834905bbfd97bacae5a419123563fd8da933746 100644
+--- a/dist/emotion-sheet.development.esm.js
++++ b/dist/emotion-sheet.development.esm.js
+@@ -78,6 +78,7 @@ var StyleSheet = /*#__PURE__*/function () {
+       _this.container.insertBefore(tag, before);
+ 
+       _this.tags.push(tag);
++      performance.mark('Emotion_end');
+     };
+ 
+     this.isSpeedy = options.speedy === undefined ? !isDevelopment : options.speedy;
