@@ -160,13 +160,12 @@ function processBreakpointString(
     return t.stringLiteral(cssString[0]);
   }
   const breakpointKeyId = t.identifier('key');
-  const breakpointWithSlash = t.identifier('ks');
   const expressions: ReturnType<
     Core['types']['memberExpression' | 'identifier']
   >[] = [t.memberExpression(breakpointsImport, breakpointKeyId, true)];
 
   for (let i = 0; i < cssString.length - 1; i++) {
-    expressions.push(breakpointWithSlash);
+    expressions.push(breakpointKeyId);
   }
   cssString = cssString.map((str, index) => {
     if (index === 0) {
@@ -198,20 +197,13 @@ function processBreakpointString(
     [
       t.arrowFunctionExpression(
         [t.identifier('acc'), breakpointKeyId],
-        t.blockStatement([
-          t.variableDeclaration('const', [
-            t.variableDeclarator(
-              breakpointWithSlash,
-              t.binaryExpression('+', breakpointKeyId, t.stringLiteral('\\'))
-            ),
-          ]),
-          t.returnStatement(
-            t.binaryExpression('+', t.identifier('acc'), templateElement)
-          ),
-        ])
+        t.binaryExpression('+', t.identifier('acc'), templateElement)
       ),
       t.stringLiteral(
-        str.replaceAll(`${PLACEHOLDERS.BREAKPOINT_PLACEHOLDER}\\:`, '')
+        str.replaceAll(
+          new RegExp(`${PLACEHOLDERS.BREAKPOINT_PLACEHOLDER}[\\\\]{0,}:`, 'g'),
+          ''
+        )
       ),
     ]
   );

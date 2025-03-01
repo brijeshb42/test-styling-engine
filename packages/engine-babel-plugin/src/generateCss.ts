@@ -271,7 +271,7 @@ export function generateCss(
                       'g'
                     );
                     if (classNameRegexp.test(sel.name)) {
-                      sel.name = `${PLACEHOLDERS.BREAKPOINT_PLACEHOLDER}:${sel.name}`;
+                      sel.name = `${PLACEHOLDERS.BREAKPOINT_PLACEHOLDER}\\:${sel.name}`;
                     }
                   }
                 });
