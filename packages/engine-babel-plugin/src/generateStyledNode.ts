@@ -337,7 +337,9 @@ export function generateStyledNode(
   const styleIdentifier = babel.addNamedStyleImport('Style');
 
   const hash = href || relevantHash;
-  const styleElement = t.jsxIdentifier(styleIdentifier.name);
+  const styleElement = t.jsxIdentifier(
+    styleIdentifier ? styleIdentifier.name : 'style'
+  );
 
   const styleOpening = t.jsxOpeningElement(
     styleElement,

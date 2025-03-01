@@ -8,5 +8,5 @@ export type Core = typeof core & {
   addNamedStyleImport(
     name: string,
     source?: string
-  ): ReturnType<(typeof core)['types']['identifier']>;
+  ): null | ReturnType<(typeof core)['types']['identifier']>;
 };

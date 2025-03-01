@@ -34,6 +34,9 @@ export default function stylingEnginePlugin(
   };
   const addNamedStyleImport = (path: NodePath, name: string) => {
     const importSource = options?.styleTagImportPath ?? '';
+    if (!importSource) {
+      return null;
+    }
     if (!importMap[importSource]) {
       importMap[importSource] = {};
     }
