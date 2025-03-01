@@ -243,3 +243,53 @@ test('should fallback to "style" element if import path for Style is not provide
     "
   `);
 });
+
+test('transform utility classes correctly', async () => {
+  const result = await transformAndFormat(
+    `import { css } from 'styling-engine';
+
+  const res = css\`@breakpoints {
+  .mui-ac-center {
+    align-content: center;
+  }
+  .mui-ac-end {
+    align-content: end;
+  }
+  .mui-ac-normal {
+    align-content: normal;
+  }
+  .mui-ac-start {
+    align-content: start;
+  }
+  .mui-ac-space-around {
+    align-content: space-around;
+  }
+  .mui-ac-space-between {
+    align-content: space-between;
+  }
+  .mui-ac-space-evenly {
+    align-content: space-evenly;
+  }
+  .mui-ac-stretch {
+    align-content: stretch;
+  }
+}\``,
+    ''
+  );
+  expect(result).toMatchInlineSnapshot(`
+    "import { breakpoints as _breakpoints } from 'styling-engine/config';
+    const res = (
+      <style href="wr6f9v" precedence="mui-components">
+        {'' +
+          Object.keys(_breakpoints).reduce(
+            (acc, key) =>
+              acc +
+              \`@media \${_breakpoints[key]}{ .\${key}\\:mui-ac-center{align-content:center}.\${key}\\:mui-ac-end{align-content:end}.\${key}\\:mui-ac-normal{align-content:normal}.\${key}\\:mui-ac-start{align-content:start}.\${key}\\:mui-ac-space-around{align-content:space-around}.\${key}\\:mui-ac-space-between{align-content:space-between}.\${key}\\:mui-ac-space-evenly{align-content:space-evenly}.\${key}\\:mui-ac-stretch{align-content:stretch} }\`,
+            '.mui-ac-center{align-content:center}.mui-ac-end{align-content:end}.mui-ac-normal{align-content:normal}.mui-ac-start{align-content:start}.mui-ac-space-around{align-content:space-around}.mui-ac-space-between{align-content:space-between}.mui-ac-space-evenly{align-content:space-evenly}.mui-ac-stretch{align-content:stretch}'
+          ) +
+          ''}
+      </style>
+    );
+    "
+  `);
+});
