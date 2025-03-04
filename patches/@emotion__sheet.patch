@@ -10,3 +10,23 @@ index d7e942293977e93b7e47d403777354cfbec4c772..a834905bbfd97bacae5a419123563fd8
      };
  
      this.isSpeedy = options.speedy === undefined ? !isDevelopment : options.speedy;
+diff --git a/dist/emotion-sheet.esm.js b/dist/emotion-sheet.esm.js
+index e4b292b52fa436ecabc7837ca98b0906e1d1e005..2e92330a13c8d49f5ba8a5af7cf0c45b60e7a8e6 100644
+--- a/dist/emotion-sheet.esm.js
++++ b/dist/emotion-sheet.esm.js
+@@ -78,6 +78,7 @@ var StyleSheet = /*#__PURE__*/function () {
+       _this.container.insertBefore(tag, before);
+ 
+       _this.tags.push(tag);
++      performance.mark('Emotion_end');
+     };
+ 
+     this.isSpeedy = options.speedy === undefined ? !isDevelopment : options.speedy;
+@@ -115,6 +116,7 @@ var StyleSheet = /*#__PURE__*/function () {
+         // this is the ultrafast version, works across browsers
+         // the big drawback is that the css won't be editable in devtools
+         sheet.insertRule(rule, sheet.cssRules.length);
++        performance.mark('Emotion_end');
+       } catch (e) {
+       }
+     } else {

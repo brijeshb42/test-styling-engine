@@ -12,3 +12,17 @@ index 83ea1c6a783efe2e674eda4b681eb361f000d12d..c84fe7324cba0e23d0ecc13cfb7cbe53
      }
      function adoptPreloadPropsForStylesheet(stylesheetProps, preloadProps) {
        null == stylesheetProps.crossOrigin &&
+diff --git a/cjs/react-dom-client.production.js b/cjs/react-dom-client.production.js
+index af7283abaca3e5812ef71b03d9c999410baa1a80..9e1dece6c1825fc0fa565b73601d95817c1bfeb6 100644
+--- a/cjs/react-dom-client.production.js
++++ b/cjs/react-dom-client.production.js
+@@ -14056,6 +14056,9 @@ function insertStylesheet(instance, precedence, root) {
+     ? prior.parentNode.insertBefore(instance, prior.nextSibling)
+     : ((precedence = 9 === root.nodeType ? root.head : root),
+       precedence.insertBefore(instance, precedence.firstChild));
++      performance.mark('Style_end', {
++        detail: instance.dataset.href
++      });
+ }
+ function adoptPreloadPropsForStylesheet(stylesheetProps, preloadProps) {
+   null == stylesheetProps.crossOrigin &&
