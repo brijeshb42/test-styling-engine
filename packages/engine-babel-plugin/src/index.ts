@@ -1,20 +1,31 @@
+import * as path from 'node:path';
 import type { NodePath, PluginObj } from '@babel/core';
 import { addNamed } from '@babel/helper-module-imports';
 
 import type { Core } from './types';
 import { generateStyledNode, UserOptions } from './generateStyledNode';
+import type { OutputType } from './generateCss';
 
 export type StylingEnginePluginOptions = {
   importPathEndsWith?: string;
   breakpointsPath: string;
   styleTagImportPath: string;
+  output?: OutputType;
+  addCssImportToFile?: boolean;
 };
+
+export const PLUGIN_NAME = 'styling-engine-plugin';
 
 export default function stylingEnginePlugin(
   babel: Core,
   options?: Partial<StylingEnginePluginOptions>
 ): PluginObj {
-  const { importPathEndsWith = '@joy/styling-engine' } = options ?? {};
+  const {
+    importPathEndsWith = '@joy/styling-engine',
+    output = 'runtime',
+    addCssImportToFile = false,
+  } = options ?? {};
+  const { types: t } = babel;
 
   let importMap: Record<
     string,
@@ -49,7 +60,7 @@ export default function stylingEnginePlugin(
   };
 
   return {
-    name: 'styling-engine-plugin',
+    name: PLUGIN_NAME,
     pre() {
       importMap = {};
     },
@@ -113,23 +124,31 @@ export default function stylingEnginePlugin(
           addNamedImport(node, name, source);
         const addNamedStyleImportLocal = (name: string) =>
           addNamedStyleImport(node, name);
-
-        node.replaceWith(
-          generateStyledNode(
-            {
-              ...babel,
-              addNamedImport: addNamedImportLocal,
-              addNamedStyleImport: addNamedStyleImportLocal,
-            },
-            cssStr,
-            userOptions,
-            state.filename,
-            node.node.loc
-          )
+        const result = generateStyledNode(
+          {
+            ...babel,
+            addNamedImport: addNamedImportLocal,
+            addNamedStyleImport: addNamedStyleImportLocal,
+          },
+          cssStr,
+          userOptions,
+          {
+            filename: state.filename,
+            location: node.node.loc,
+            output,
+          }
         );
+
+        node.replaceWith(result.node);
+        if (output === 'static') {
+          const css =
+            (this.file.metadata as Record<string, string[]>)[PLUGIN_NAME] ?? [];
+          css.push(result.css);
+          (this.file.metadata as Record<string, string[]>)[PLUGIN_NAME] = css;
+        }
       },
       Program: {
-        exit(node) {
+        exit(node, state) {
           node.traverse({
             ImportDeclaration(decl) {
               const source = decl.get('source');
@@ -143,6 +162,23 @@ export default function stylingEnginePlugin(
               }
             },
           });
+
+          if (addCssImportToFile && output === 'static') {
+            const css = (state.file.metadata as Record<string, string[]>)[
+              PLUGIN_NAME
+            ];
+            if (!css?.length) {
+              return;
+            }
+            const file = state.file.opts.filename;
+            const cssFileName = !file
+              ? 'index.css'
+              : `${path.basename(file, path.extname(file))}.css`;
+            node.unshiftContainer(
+              'body',
+              t.importDeclaration([], t.stringLiteral(`./${cssFileName}`))
+            );
+          }
         },
       },
     },

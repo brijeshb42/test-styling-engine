@@ -1,7 +1,12 @@
 import hashString from '@emotion/hash';
 
 import { Core } from './types';
-import { generateCss, PLACEHOLDERS, Position } from './generateCss';
+import {
+  generateCss,
+  type OutputType,
+  PLACEHOLDERS,
+  Position,
+} from './generateCss';
 
 export type UserOptions = {
   href?: string;
@@ -322,16 +327,32 @@ function generateCssWithoutSeparators(babel: Core, cssString: string) {
 export function generateStyledNode(
   babel: Core,
   css: string,
-  options: UserOptions | null,
-  filename?: string,
-  location?: {
-    start: Position;
-    end: Position;
-  } | null
-): ReturnType<Core['types']['jsxElement']> {
+  userOptions: UserOptions | null,
+  options?: {
+    filename?: string;
+    location?: {
+      start: Position;
+      end: Position;
+    } | null;
+    output?: OutputType;
+  }
+): {
+  node: ReturnType<Core['types']['jsxElement' | 'nullLiteral']>;
+  css: string;
+} {
   const { types: t } = babel;
-  const { href, precedence = 'mui-components' } = options ?? {};
-  const transformedCss = generateCss(css, filename, { location });
+  const { href, precedence = 'mui-components' } = userOptions ?? {};
+  const { filename, location, output = 'runtime' } = options ?? {};
+  const transformedCss = generateCss(css, filename, {
+    location,
+    supportsRuntime: output === 'runtime',
+  });
+  if (output === 'static') {
+    return {
+      node: t.nullLiteral(),
+      css: transformedCss,
+    };
+  }
   const { hash: relevantHash, result: cssStringAST } =
     generateCssWithoutSeparators(babel, transformedCss);
   const styleIdentifier = babel.addNamedStyleImport('Style');
@@ -357,5 +378,8 @@ export function generateStyledNode(
     t.jsxClosingElement(styleElement),
     [t.jsxExpressionContainer(cssStringAST)]
   );
-  return styleTag;
+  return {
+    node: styleTag,
+    css: transformedCss,
+  };
 }
