@@ -1,5 +1,4 @@
 import fs from 'node:fs/promises';
-import * as path from 'node:path';
 
 import { defineConfig, type Options } from 'tsup';
 import { transformAsync, loadOptions } from '@babel/core';

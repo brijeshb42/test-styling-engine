@@ -1,4 +1,12 @@
-import { transform, Features, Declaration, Visitor } from 'lightningcss';
+import {
+  transform,
+  Features,
+  Visitor,
+  MediaQuery,
+  Declaration,
+  SelectorList,
+} from 'lightningcss';
+import { cloneDeep } from 'lodash';
 import { codeFrameColumns } from '@babel/code-frame';
 
 export type Position = {
@@ -72,6 +80,14 @@ const COMPONENT_PROPS_RESPONSIVE_CLASS_NAMES: Record<string, string> = {
   variant: 'variant',
 };
 
+const BREAKPOINTS: Record<string, string> = {
+  xs: '(min-width: 520px)',
+  sm: '(min-width: 768px)',
+  md: '(min-width: 1024px)',
+  lg: '(min-width: 1280px)',
+  xl: '(min-width: 1640px)',
+};
+
 export const PLACEHOLDERS = {
   SEPARATOR_START: '#__separator-start',
   SEPARATOR_END: '#__separator-end',
@@ -83,6 +99,7 @@ type GenerateCssOptions = {
   prefix?: string;
   utilityClasses?: Record<string, string>;
   responsiveClasses?: Record<string, string>;
+  breakpoints?: Record<string, string>;
   location?: {
     start: Position;
     end: Position;
@@ -116,14 +133,12 @@ function runtimeBreakpointVisitor({
   prefix,
   utilityClasses,
   responsiveClasses,
-  output,
 }: {
   css: string;
   prefix: string;
   utilityClasses: Record<string, string>;
   responsiveClasses: Record<string, string>;
   startLine?: number;
-  output?: OutputType;
 }): Visitor<{
   breakpoints: {
     body: 'style-block';
@@ -278,6 +293,146 @@ function runtimeBreakpointVisitor({
   };
 }
 
+function staticBreakpointVisitor({
+  css: cssStr,
+  prefix,
+  utilityClasses,
+  responsiveClasses,
+  breakpoints,
+}: {
+  css: string;
+  prefix: string;
+  breakpoints: Record<string, string>;
+  utilityClasses: Record<string, string>;
+  responsiveClasses: Record<string, string>;
+  startLine?: number;
+}): Visitor<{
+  breakpoints: {
+    body: 'style-block';
+  };
+}> {
+  const mediaRules: Record<string, MediaQuery[]> = {};
+  return {
+    Rule: {
+      'custom-media'(rule) {
+        const ruleName = rule.value.name.slice(2);
+        if (breakpoints[ruleName]) {
+          mediaRules[rule.value.name.slice(2)] = rule.value.query.mediaQueries;
+        }
+        return rule;
+      },
+      custom: {
+        breakpoints(rule) {
+          const result = [...rule.body.value];
+          const resultClone = cloneDeep(result);
+
+          Object.entries(mediaRules).forEach(
+            ([breakpointName, mediaQueries]) => {
+              const ruleClone = cloneDeep(rule.body.value);
+              ruleClone.forEach((style) => {
+                if (style.type !== 'style') {
+                  return;
+                }
+                const utilClassNameRegexp = new RegExp(
+                  `^(-?(${prefix}-)?(?:${Object.values(utilityClasses).join('|')})(?:-[a-z0-9]+)*(?![-a-z0-9]))`,
+                  'g'
+                );
+                const responsiveClassNameRegexp = new RegExp(
+                  `(-?(?:${Object.values(responsiveClasses).join(
+                    '|'
+                  )})(?:-[a-z0-9]+)*(?![-a-z0-9]))`,
+                  'g'
+                );
+                const selectors = style.value.selectors;
+                const modifiedSelectors: SelectorList = [];
+                selectors.forEach((selector) => {
+                  if (selector.length === 1) {
+                    const utilClassNameRegexp = new RegExp(
+                      `^(-?(${prefix}-)?(?:${Object.values(utilityClasses).join('|')})(?:-[a-z0-9]+)*(?![-a-z0-9]))`,
+                      'g'
+                    );
+                    if (selector[0].type !== 'class') {
+                      throw new Error(
+                        generateError(
+                          cssStr,
+                          `Only class selector is supported in @breakpoints. Found "${selector[0].type}" selector.`,
+                          style.value.loc
+                        )
+                      );
+                    }
+                    if (utilClassNameRegexp.test(selector[0].name)) {
+                      modifiedSelectors.push([
+                        {
+                          type: 'class',
+                          name: breakpointName,
+                        },
+                        selector[0],
+                      ]);
+                    }
+                  }
+                  if (selector.length > 2) {
+                    throw new Error(
+                      generateError(
+                        cssStr,
+                        `Found more than one variant selector. "@breakpoints" does not support compound props yet.`,
+                        style.value.loc
+                      )
+                    );
+                  }
+
+                  if (
+                    selector.find((sel) => {
+                      if (sel.type === 'class') {
+                        const classNameRegexp = new RegExp(
+                          `(-?(?:${Object.values(responsiveClasses).join(
+                            '|'
+                          )})(?:-[a-z0-9]+)*(?![-a-z0-9]))`,
+                          'g'
+                        );
+                        if (classNameRegexp.test(sel.name)) {
+                          return true;
+                        }
+                      }
+                      return false;
+                    })
+                  ) {
+                    modifiedSelectors.push([
+                      ...selector.slice(0, selector.length - 1),
+                      {
+                        type: 'class',
+                        name: breakpointName,
+                      },
+                      selector[selector.length - 1],
+                    ]);
+                  }
+                });
+                style.value.selectors = modifiedSelectors;
+              });
+              result.push({
+                type: 'media',
+                value: {
+                  loc: rule.loc,
+                  query: {
+                    mediaQueries: mediaQueries,
+                  },
+                  rules: ruleClone,
+                },
+              });
+            }
+          );
+          return result;
+        },
+      },
+    },
+  };
+}
+
+function generateCustomMediaCss(breakpoints: Record<string, string>) {
+  return Object.entries(breakpoints)
+    .map(([name, query]) => `@custom-media --${name} ${query};`)
+    .join('\n');
+}
+
 /**
  * Transforms the given CSS string to browser understanable CSS.
  * Handles `@breakpoints` custom at-rule as well as custom media queries like `@media (--xs)` etc.
@@ -342,13 +497,17 @@ export function generateCss(
     utilityClasses = UTILITY_RESPONSIVE_CLASS_NAMES,
     responsiveClasses = COMPONENT_PROPS_RESPONSIVE_CLASS_NAMES,
     location,
+    breakpoints = BREAKPOINTS,
   } = options ?? {};
-  const css = Buffer.from(cssStr);
+  const css = Buffer.from(
+    `${supportsRuntime ? '' : generateCustomMediaCss(breakpoints)}\n${cssStr}`
+  );
+
   const result = transform({
     minify: true,
     filename,
     code: css,
-    include: Features.Nesting,
+    include: Features.Nesting | Features.CustomMediaQueries,
     customAtRules: {
       breakpoints: {
         body: 'style-block',
@@ -365,7 +524,14 @@ export function generateCss(
           responsiveClasses,
           startLine: location?.start.line ?? 0,
         })
-      : undefined,
+      : staticBreakpointVisitor({
+          css: cssStr,
+          prefix,
+          utilityClasses,
+          responsiveClasses,
+          breakpoints,
+          startLine: location?.start.line ?? 0,
+        }),
   });
   return result.code.toString();
 }
