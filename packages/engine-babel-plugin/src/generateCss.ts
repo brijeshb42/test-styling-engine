@@ -8,6 +8,11 @@ import {
 } from 'lightningcss';
 import { cloneDeep } from 'lodash';
 import { codeFrameColumns } from '@babel/code-frame';
+import {
+  COMPONENT_PROPS_RESPONSIVE_CLASS_NAMES,
+  UTILITY_RESPONSIVE_CLASS_NAMES,
+  BREAKPOINTS,
+} from './defaultConfig';
 
 export type Position = {
   line: number;
@@ -19,74 +24,6 @@ export type OutputType = 'runtime' | 'static';
 function generateRandomNumberBetween(min: number = 1, max: number = 1000) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
-
-const UTILITY_RESPONSIVE_CLASS_NAMES: Record<string, string> = {
-  // Utilities
-  'align-content': 'ac',
-  'align-items': 'ai',
-  'align-self': 'as',
-  bottom: 'b',
-  'column-gap': 'cg',
-  display: 'd',
-  'flex-basis': 'fb',
-  'flex-direction': 'fd',
-  'flex-grow': 'fg',
-  'flex-shrink': 'fs',
-  'flex-wrap': 'fw',
-  gap: 'g',
-  'grid-column-end': 'gce',
-  'grid-column-start': 'gcs',
-  'grid-row-end': 'gre',
-  'grid-row-start': 'grs',
-  'grid-template-columns': 'gtc',
-  'grid-template-rows': 'gtr',
-  height: 'h',
-  inset: 'i',
-  'justify-content': 'jc',
-  left: 'l',
-  'margin-bottom': 'mb',
-  'margin-left': 'ml',
-  'margin-right': 'mr',
-  'margin-top': 'mt',
-  'margin-x': 'mx',
-  'margin-y': 'my',
-  margin: 'm',
-  'max-height': 'max-h',
-  'max-width': 'max-w',
-  'min-height': 'min-h',
-  'min-width': 'min-w',
-  'overflow-x': 'ox',
-  'overflow-y': 'oy',
-  overflow: 'o',
-  'padding-bottom': 'pb',
-  'padding-left': 'pl',
-  'padding-right': 'pr',
-  'padding-top': 'pt',
-  'padding-x': 'px',
-  'padding-y': 'py',
-  padding: 'p',
-  position: 'pos',
-  right: 'r',
-  'row-gap': 'rg',
-  'text-align': 'ta',
-  'text-wrap': 'tw',
-  top: 't',
-  width: 'w',
-};
-
-const COMPONENT_PROPS_RESPONSIVE_CLASS_NAMES: Record<string, string> = {
-  // Component props
-  size: 'size',
-  variant: 'variant',
-};
-
-const BREAKPOINTS: Record<string, string> = {
-  xs: '(min-width: 520px)',
-  sm: '(min-width: 768px)',
-  md: '(min-width: 1024px)',
-  lg: '(min-width: 1280px)',
-  xl: '(min-width: 1640px)',
-};
 
 export const PLACEHOLDERS = {
   SEPARATOR_START: '#__separator-start',
