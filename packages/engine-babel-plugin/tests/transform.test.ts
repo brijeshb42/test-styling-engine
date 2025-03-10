@@ -122,7 +122,6 @@ test('should transform multiple @breakpoints references', async () => {
       &:disabled {
         color: gray;
       }
-      
       @breakpoints {
         &.variant-1 {
           color: green
