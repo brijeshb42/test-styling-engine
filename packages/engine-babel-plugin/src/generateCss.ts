@@ -128,7 +128,7 @@ function generateError(
   );
 }
 
-function runtimeBreakpointVisitor({
+function runtimeVisitor({
   css: cssStr,
   prefix,
   utilityClasses,
@@ -293,7 +293,7 @@ function runtimeBreakpointVisitor({
   };
 }
 
-function staticBreakpointVisitor({
+function staticVisitor({
   css: cssStr,
   prefix,
   utilityClasses,
@@ -517,14 +517,14 @@ export function generateCss(
       customMedia: !supportsRuntime,
     },
     visitor: supportsRuntime
-      ? runtimeBreakpointVisitor({
+      ? runtimeVisitor({
           css: cssStr,
           prefix,
           utilityClasses,
           responsiveClasses,
           startLine: location?.start.line ?? 0,
         })
-      : staticBreakpointVisitor({
+      : staticVisitor({
           css: cssStr,
           prefix,
           utilityClasses,
