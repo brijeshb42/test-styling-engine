@@ -11,7 +11,7 @@ if (typeof styleRepeatCount === 'string') {
 }
 for (let i = 0; i < NUM_OF_ITEMS; i++) {
   const { result, hash } = getCss(i, repeat);
-  const cssStr = result.map((res) => `.mui-Button {${res}}`).join('');
+  const cssStr = result.map((res) => `.mui-Button-${i} {${res}}`).join('');
   const style = (
     <style href={hash} precedence={`button-${i}`}>
       {cssStr}
@@ -20,7 +20,7 @@ for (let i = 0; i < NUM_OF_ITEMS; i++) {
   function Component({ children }: { children?: React.ReactNode }) {
     performance.mark('Style_start');
     return (
-      <button className="mui-Button">
+      <button className={`mui-Button-${i}`}>
         {style}
         {children}
       </button>
