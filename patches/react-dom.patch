@@ -13,10 +13,123 @@ index 83ea1c6a783efe2e674eda4b681eb361f000d12d..c84fe7324cba0e23d0ecc13cfb7cbe53
      function adoptPreloadPropsForStylesheet(stylesheetProps, preloadProps) {
        null == stylesheetProps.crossOrigin &&
 diff --git a/cjs/react-dom-client.production.js b/cjs/react-dom-client.production.js
-index af7283abaca3e5812ef71b03d9c999410baa1a80..50d3aa868663022dc51d7074b4f332b772fee27c 100644
+index af7283abaca3e5812ef71b03d9c999410baa1a80..ead05e4458b117bb29bda92aa753ff044c00e011 100644
 --- a/cjs/react-dom-client.production.js
 +++ b/cjs/react-dom-client.production.js
-@@ -14037,6 +14037,7 @@ function acquireResource(hoistableRoot, resource, props) {
+@@ -13945,34 +13945,101 @@ function getScriptKey(src) {
+ function getScriptSelectorFromKey(key) {
+   return "script[async]" + key;
+ }
++
++var insertedHrefs = new Set();
++var rulesByPrecedence = new Map();
++var precedenceOrder = [];
++var styleElement = null;
++
++function getOrCreateStyleElement() {
++  if (!styleElement) {
++    styleElement = document.createElement('style');
++    document.head.appendChild(styleElement);
++  }
++  return styleElement;
++}
++
++function getInsertionIndex(sheet, precedence) {
++  const precedenceIndex = precedenceOrder.indexOf(precedence);
++  if (precedenceIndex === -1) {
++    // New precedence goes at the end
++    return sheet.cssRules.length;
++  }
++
++  // Find the first rule index of the next precedence level
++  for (let i = precedenceIndex + 1; i < precedenceOrder.length; i++) {
++    const nextPrecedenceRules = rulesByPrecedence.get(precedenceOrder[i]);
++    if (nextPrecedenceRules?.[0]) {
++      return nextPrecedenceRules[0].ruleIndex;
++    }
++  }
++
++  // If no next precedence found, insert at the end
++  return sheet.cssRules.length;
++}
++
++function updateRuleIndices(startIndex, shift) {
++  // Update all rule indices that come after the insertion point
++  for (const rules of rulesByPrecedence.values()) {
++    for (const rule of rules) {
++      if (rule.ruleIndex >= startIndex) {
++        rule.ruleIndex += shift;
++      }
++    }
++  }
++}
++
++function insertStyleTag(el, props, hoistableRoot) {
++  const sheet = el.sheet;
++  const precedence = props['data-precedence'];
++  const href = props['data-href'];
++  const insertionIndex = getInsertionIndex(el.sheet, precedence);
++  try {
++    // Insert the new rule at the calculated index
++    const ruleIndex = sheet.insertRule(props.children, insertionIndex);
++
++    // Update indices of subsequent rules
++    updateRuleIndices(insertionIndex, 1);
++
++    // Get or create array for this precedence
++    const rulesForPrecedence = rulesByPrecedence.get(precedence) || [];
++    rulesByPrecedence.set(precedence, rulesForPrecedence);
++
++    // Add the new rule with its index
++    rulesForPrecedence.push({ href, ruleIndex });
++  } catch (error) {
++    console.error('Error inserting CSS rule:', error);
++  }
++  performance.mark('Style_end', {
++    detail: href
++  });
++}
++
+ function acquireResource(hoistableRoot, resource, props) {
+   resource.count++;
+   if (null === resource.instance)
+     switch (resource.type) {
+       case "style":
+-        var instance = hoistableRoot.querySelector(
+-          'style[data-href~="' +
+-            escapeSelectorAttributeValueInsideDoubleQuotes(props.href) +
+-            '"]'
+-        );
+-        if (instance)
++        var instance = getOrCreateStyleElement();
++        var hasHoistedHref = insertedHrefs.has(props.href);
++        if (!precedenceOrder.includes(props.precedence)) {
++          precedenceOrder.push(props.precedence);
++        }
++        if (hasHoistedHref) {
+           return (
+             (resource.instance = instance),
+             markNodeAsHoistable(instance),
+             instance
+           );
++        }
+         var styleProps = assign({}, props, {
+           "data-href": props.href,
+           "data-precedence": props.precedence,
+           href: null,
+           precedence: null
+         });
+-        instance = (hoistableRoot.ownerDocument || hoistableRoot).createElement(
+-          "style"
+-        );
+         markNodeAsHoistable(instance);
+-        setInitialProperties(instance, "style", styleProps);
+-        insertStylesheet(instance, props.precedence, hoistableRoot);
++        insertStyleTag(instance, styleProps, hoistableRoot);
+         return (resource.instance = instance);
+       case "stylesheet":
+         styleProps = getStyleKey(props.href);
+@@ -14037,6 +14104,7 @@ function acquireResource(hoistableRoot, resource, props) {
        insertStylesheet(instance, props.precedence, hoistableRoot));
    return resource.instance;
  }
@@ -24,7 +137,7 @@ index af7283abaca3e5812ef71b03d9c999410baa1a80..50d3aa868663022dc51d7074b4f332b7
  function insertStylesheet(instance, precedence, root) {
    for (
      var nodes = root.querySelectorAll(
-@@ -14056,6 +14057,9 @@ function insertStylesheet(instance, precedence, root) {
+@@ -14056,6 +14124,9 @@ function insertStylesheet(instance, precedence, root) {
      ? prior.parentNode.insertBefore(instance, prior.nextSibling)
      : ((precedence = 9 === root.nodeType ? root.head : root),
        precedence.insertBefore(instance, precedence.firstChild));

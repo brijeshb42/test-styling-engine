@@ -8,7 +8,16 @@ const typeToRender =
 
 function App() {
   const [renderButtons, setRenderButton] = React.useState(false);
+  const [renderLater, setRenderLater] = React.useState(false);
   const children: React.JSX.Element[] = [];
+
+  const handleClick = () => {
+    setRenderButton(true);
+
+    if (renderButtons) {
+      setRenderLater(true);
+    }
+  };
 
   if (renderButtons) {
     for (let i = 0; i < NUM_OF_ITEMS; i++) {
@@ -46,10 +55,17 @@ function App() {
 
   return (
     <div>
-      <button onClick={() => setRenderButton(!renderButtons)}>
+      <button onClick={handleClick}>
         Render Button
       </button>
       {renderButtons && children}
+      {renderLater && (
+        <style href="test" precedence='button-0'>
+          {`.mui-Button-1 {
+            background-color: red;
+          }`}
+        </style>
+      )}
     </div>
   );
 }

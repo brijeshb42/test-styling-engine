@@ -13,8 +13,8 @@ for (let i = 0; i < NUM_OF_ITEMS; i++) {
   const { result, hash } = getCss(i, repeat);
   const cssStr = result.map((res) => `.mui-Button {${res}}`).join('');
   const style = (
-    <style href={hash} precedence="button">
-      {`.mui-Button {${cssStr}}`}
+    <style href={hash} precedence={`button-${i}`}>
+      {cssStr}
     </style>
   );
   function Component({ children }: { children?: React.ReactNode }) {
