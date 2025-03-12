@@ -444,7 +444,8 @@ export function generateCss(
     minify: true,
     filename,
     code: css,
-    include: Features.Nesting | Features.CustomMediaQueries,
+    include:
+      Features.Nesting | (supportsRuntime ? 0 : Features.CustomMediaQueries),
     customAtRules: {
       breakpoints: {
         body: 'style-block',
