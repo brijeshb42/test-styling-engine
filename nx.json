@@ -9,6 +9,9 @@
         "{projectRoot}/dist",
         "{projectRoot}/.next"
       ]
+    },
+    "start": {
+      "dependsOn": ["build"]
     }
   }
 }

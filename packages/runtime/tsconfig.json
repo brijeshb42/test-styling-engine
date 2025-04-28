@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "@styled/typescript-styled-plugin"
+      }
+    ],
+    "paths": {
+      "#is-browser": ["./types/resolved-condition.ts"],
+      "#is-development": ["./types/resolved-condition.ts"]
+    }
+  }
+}

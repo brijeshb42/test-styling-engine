@@ -1,0 +1,33 @@
+{
+  "name": "@joy/styled-preprocessor-stylis",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "tsup --config ../../tsup.config.ts"
+  },
+  "dependencies": {
+    "stylis": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/stylis": "^4.2.7"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "imports": {
+    "#is-development": {
+      "development": "./src/conditions/true.ts",
+      "default": "./src/conditions/false.ts"
+    }
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": {
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.js"
+      }
+    }
+  }
+}

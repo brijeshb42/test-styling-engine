@@ -23,7 +23,9 @@
         "./packages/engine-babel-plugin/src"
       ],
       "@joy/joy-ui": ["./packages/joy/src"],
-      "@joy/joy-ui/*": ["./packages/joy/src/*"]
+      "@joy/joy-ui/*": ["./packages/joy/src/*"],
+      "@joy/styled": ["./packages/runtime/src"],
+      "@joy/styled/*": ["./packages/runtime/src/*"]
     },
     // Otherwise we get react-native typings which conflict with dom.lib.
     "types": ["node", "react", "vitest/globals"]

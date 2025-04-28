@@ -1,0 +1,30 @@
+{
+  "name": "@joy/styled-preprocessor-lightningcss",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "tsup --config ../../tsup.config.ts"
+  },
+  "dependencies": {
+    "lightningcss": "^1.29.3"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "imports": {
+    "#is-development": {
+      "development": "./src/conditions/true.ts",
+      "default": "./src/conditions/false.ts"
+    }
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": {
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.js"
+      }
+    }
+  }
+}

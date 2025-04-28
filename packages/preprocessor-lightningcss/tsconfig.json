@@ -1,0 +1,8 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "#is-development": ["./types/resolved-condition.ts"]
+    }
+  }
+}
