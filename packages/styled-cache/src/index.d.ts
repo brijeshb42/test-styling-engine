@@ -5,13 +5,15 @@ export interface Options {
   key: string;
 }
 
-export declare function CacheProvider({
+type Cache = {
+  isStyleRendered: (key: string) => boolean;
+  addStyleToCache: (key: string, style: string) => void;
+};
+
+export declare function StyledCacheProvider({
   children,
 }: {
   children: React.ReactNode;
 }): React.JSX.Element;
 
-export declare function useCache(): {
-  isStyleRendered: (key: string) => boolean;
-  addStyleToCache: (key: string, style: string) => void;
-};
+export declare function useStyledCache(): Cache;

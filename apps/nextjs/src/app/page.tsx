@@ -1,16 +1,11 @@
 import styled from '@brijbyte/styled';
 
-const hoverColor = '#383838';
-
-const T1 = styled('h1', {
-  label: 'T1',
-});
-const Page = styled('div')`
+export const Page = styled('div')`
   --gray-rgb: 0, 0, 0;
   --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
   --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
 
-  --button-primary-hover: ${hoverColor};
+  --button-primary-hover: #383838;
   --button-secondary-hover: #f2f2f2;
 
   display: grid;
@@ -37,7 +32,7 @@ const Page = styled('div')`
   }
 `;
 
-const Main = styled('main')`
+export const Main = styled('main')`
   display: flex;
   flex-direction: column;
   gap: 32px;
@@ -142,7 +137,7 @@ const Cta = styled('div')`
   }
 `;
 
-const Footer = styled('footer')`
+export const Footer = styled('footer')`
   grid-row-start: 3;
   display: flex;
   gap: 24px;

@@ -1,14 +1,14 @@
 import * as React from 'react';
 import type { CreateStyled, StyledOptions } from '@emotion/styled';
-import { serializeStyles, Interpolation } from '@emotion/serialize';
+import { Interpolation } from '@emotion/serialize';
 import isDevelopment from '#is-development';
-import { generateCss as generateStylisCss } from '@brijbyte/styled-preprocessor-stylis';
 
 import type { ElementType } from './types';
 import {
   composeShouldForwardProps,
   getDefaultShouldForwardProp,
 } from './utils';
+import { processStyles } from './processStyles';
 
 declare module '@emotion/styled' {
   export interface FilteringStyledOptions<
@@ -29,27 +29,6 @@ declare module '@emotion/styled' {
   }
 }
 
-function isArgsTaggedTemplateLiteral(args: any[]) {
-  const result =
-    args.length > 0 &&
-    Array.isArray(args[0]) &&
-    Object.prototype.hasOwnProperty.call(args[0], 'raw');
-
-  if (!result) {
-    return {
-      result,
-      hasDynamicStyles: false,
-    };
-  }
-
-  const hasDynamicStyles = args.some((item) => typeof item === 'function');
-
-  return {
-    result,
-    hasDynamicStyles: result && hasDynamicStyles,
-  };
-}
-
 function createStyled(tag: ElementType, options?: StyledOptions) {
   if (isDevelopment) {
     if (tag === undefined) {
@@ -64,7 +43,7 @@ function createStyled(tag: ElementType, options?: StyledOptions) {
 
   let identifierName: string | undefined;
   let targetClassName: string | undefined;
-  let precedence: string | undefined;
+  let precedence: string | undefined = 'component';
   if (options !== undefined) {
     identifierName = options.label;
     targetClassName = options.target;
@@ -81,49 +60,14 @@ function createStyled(tag: ElementType, options?: StyledOptions) {
       TemplateStringsArray | Interpolation
     >;
 
-    let generatedStaticStyles: {
-      key: string;
-      className: string;
-      css: string;
-    }[] = [];
-
-    const { result: isTaggedTemplateLiteral, hasDynamicStyles } =
-      isArgsTaggedTemplateLiteral(styles);
-
-    if (isTaggedTemplateLiteral) {
-      if (!hasDynamicStyles) {
-        const serialized = serializeStyles(styles, undefined);
-        const className = `css-${serialized.name}`;
-        generatedStaticStyles.push({
-          key: serialized.name,
-          className,
-          css: generateStylisCss(`.${className}`, serialized.styles),
-        });
-      }
-    }
-
-    const staticClasses = generatedStaticStyles
-      .map((style) => style.className)
-      .join(' ');
-    const staticStyles = generatedStaticStyles.map((style) => {
-      return (
-        <style key={style.key} href={style.key} precedence="component">
-          {style.css}
-        </style>
-      );
-    });
+    const processedStyles = processStyles(styles);
 
     const Styled: ElementType = React.forwardRef((props, ref) => {
       const FinalTag = (shouldUseAs && (props.as as React.ElementType)) || tag;
       let className = '';
       let mergedProps = props;
 
-      if (props.theme == null) {
-        mergedProps = {};
-        for (let key in props) {
-          mergedProps[key] = props[key];
-        }
-      }
+      // handle theme
 
       const finalShouldForwardProp =
         shouldUseAs && shouldForwardProp === undefined
@@ -139,16 +83,27 @@ function createStyled(tag: ElementType, options?: StyledOptions) {
           newProps[key] = props[key];
         }
       }
-      newProps.className =
-        `${className} ${staticClasses}${props.className ? ` ${props.className}` : ''}`.trim();
       if (ref) {
         newProps.ref = ref;
       }
+      newProps.className =
+        `${className} ${props.className ? ` ${props.className}` : ''}`.trim();
 
       return (
         <>
+          {processedStyles.map((style) => {
+            const result =
+              style.type === 'dynamic' ? style.css(mergedProps) : style;
+            newProps.className =
+              `${newProps.className} ${result.className}`.trim();
+
+            return (
+              <style key={result.key} href={result.key} precedence={precedence}>
+                {result.css}
+              </style>
+            );
+          })}
           <FinalTag key="component" {...newProps} />
-          {staticStyles}
         </>
       );
     });

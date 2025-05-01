@@ -24,8 +24,12 @@
       ],
       "@joy/joy-ui": ["./packages/joy/src"],
       "@joy/joy-ui/*": ["./packages/joy/src/*"],
-      "@joy/styled": ["./packages/runtime/src"],
-      "@joy/styled/*": ["./packages/runtime/src/*"]
+      "@brijbyte/styled": ["./packages/styled/src"],
+      "@brijbyte/styled/*": ["./packages/styled/src/*"],
+      "@brijbyte/styled-cache": ["./packages/styled-cache/src"],
+      "@brijbyte/styled-cache/*": ["./packages/styled-cache/src/*"],
+      "@brijbyte/styled-preprocessor-stylis": ["./packages/styled-preprocessor-stylis/src"],
+      "@brijbyte/styled-preprocessor-stylis/*": ["./packages/styled-preprocessor-stylis/src/*"]
     },
     // Otherwise we get react-native typings which conflict with dom.lib.
     "types": ["node", "react", "vitest/globals"]

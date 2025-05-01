@@ -26,9 +26,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <style precedence="component" href="0" />
-      </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <AppContextProvider value={1}>{children}</AppContextProvider>
       </body>

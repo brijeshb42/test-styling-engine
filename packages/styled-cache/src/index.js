@@ -1,26 +1,18 @@
 'use client';
 import * as React from 'react';
 
-const CacheContext = React.createContext(null);
+import { generateBaseCache } from './common';
 
-export function useCache() {
+const CacheContext = React.createContext(generateBaseCache());
+
+export function useStyledCache() {
   return React.useContext(CacheContext);
 }
 
-export function CacheProvider({ children }) {
+export function StyledCacheProvider({ children }) {
   const cache = React.useRef({});
 
-  const ctx = React.useMemo(
-    () => ({
-      isStyleRendered: (key) => {
-        return cache.current[key] === 1;
-      },
-      addStyleToCache: (key) => {
-        cache.current[key] = 1;
-      },
-    }),
-    [cache]
-  );
+  const ctx = React.useMemo(() => generateBaseCache(cache.current), [cache]);
 
   return <CacheContext.Provider value={ctx}>{children}</CacheContext.Provider>;
 }

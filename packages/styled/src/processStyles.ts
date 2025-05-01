@@ -1,6 +1,6 @@
-import type { Interpolation, Theme } from '@emotion/react';
+import type { Interpolation } from '@emotion/react';
 import { serializeStyles } from '@emotion/serialize';
-import { generateCss as generateStylisCss } from '@brijbyte/styled-preprocessor-stylis';
+import { generateCss as generateCssWithStylis } from '@brijbyte/styled-preprocessor-stylis';
 
 type StaticStyle = {
   type: 'static';
@@ -11,6 +11,11 @@ type StaticStyle = {
 
 type DynamicStyle = {
   type: 'dynamic';
+  css: (props: unknown) => {
+    key: string;
+    className: string;
+    css: string;
+  };
 };
 
 type ProcessedStyle = StaticStyle | DynamicStyle;
@@ -38,7 +43,7 @@ function isArgsTaggedTemplateLiteral(args: any[]) {
 }
 
 export function processStyles(
-  styles: Array<TemplateStringsArray | Interpolation<Theme>>,
+  styles: Array<TemplateStringsArray | Interpolation>,
   prefix = 'css'
 ): ProcessedStyle[] {
   const { result: isTaggedTemplateLiteral, hasDynamicStyles } =
@@ -48,16 +53,29 @@ export function processStyles(
 
   if (isTaggedTemplateLiteral) {
     if (!hasDynamicStyles) {
-      const serialized = serializeStyles(styles, undefined);
+      const serialized = serializeStyles(styles);
       const className = `${prefix}-${serialized.name}`;
       processedStyles.push({
         type: 'static',
         key: serialized.name,
         className,
-        css: generateStylisCss(`.${className}`, serialized.styles),
+        css: generateCssWithStylis(`.${className}`, serialized.styles),
       });
       return processedStyles;
     }
+    processedStyles.push({
+      type: 'dynamic',
+      css: <Props>(props: Props) => {
+        const serialized = serializeStyles<Props>(styles, undefined, props);
+        const className = `${prefix}-${serialized.name}`;
+        return {
+          key: serialized.name,
+          className,
+          css: generateCssWithStylis(`.${className}`, serialized.styles),
+        };
+      },
+    });
+    return processedStyles;
   }
 
   return processedStyles;
