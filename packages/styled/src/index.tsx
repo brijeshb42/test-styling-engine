@@ -1,15 +1,33 @@
 import * as React from 'react';
-import type { Interpolation, Theme } from '@emotion/react';
 import type { CreateStyled, StyledOptions } from '@emotion/styled';
-import { serializeStyles } from '@emotion/serialize';
+import { serializeStyles, Interpolation } from '@emotion/serialize';
 import isDevelopment from '#is-development';
-import { generateCss as generateStylisCss } from '@joy/styled-preprocessor-stylis';
+import { generateCss as generateStylisCss } from '@brijbyte/styled-preprocessor-stylis';
 
 import type { ElementType } from './types';
 import {
   composeShouldForwardProps,
   getDefaultShouldForwardProp,
 } from './utils';
+
+declare module '@emotion/styled' {
+  export interface FilteringStyledOptions<
+    Props = Record<string, any>,
+    ForwardedProps extends keyof Props & string = keyof Props & string,
+  > {
+    label?: string;
+    shouldForwardProp?: (propName: string) => propName is ForwardedProps;
+    target?: string;
+    precedence?: string;
+  }
+
+  export interface StyledOptions<Props = Record<string, any>> {
+    label?: string;
+    shouldForwardProp?: (propName: string) => boolean;
+    target?: string;
+    precedence?: string;
+  }
+}
 
 function isArgsTaggedTemplateLiteral(args: any[]) {
   const result =
@@ -46,9 +64,11 @@ function createStyled(tag: ElementType, options?: StyledOptions) {
 
   let identifierName: string | undefined;
   let targetClassName: string | undefined;
+  let precedence: string | undefined;
   if (options !== undefined) {
     identifierName = options.label;
     targetClassName = options.target;
+    precedence = options.precedence || 'component';
   }
 
   const shouldForwardProp = composeShouldForwardProps(tag, options, isReal);
@@ -58,31 +78,37 @@ function createStyled(tag: ElementType, options?: StyledOptions) {
 
   function createStyledComponent() {
     let styles = Array.prototype.slice.call(arguments) as any as Array<
-      TemplateStringsArray | Interpolation<Theme>
+      TemplateStringsArray | Interpolation
     >;
 
-    let generatedStaticStyles: Record<string, [string, string]> = {};
+    let generatedStaticStyles: {
+      key: string;
+      className: string;
+      css: string;
+    }[] = [];
 
-    const res = isArgsTaggedTemplateLiteral(styles);
+    const { result: isTaggedTemplateLiteral, hasDynamicStyles } =
+      isArgsTaggedTemplateLiteral(styles);
 
-    if (res.result) {
-      if (!res.hasDynamicStyles) {
+    if (isTaggedTemplateLiteral) {
+      if (!hasDynamicStyles) {
         const serialized = serializeStyles(styles, undefined);
         const className = `css-${serialized.name}`;
-        generatedStaticStyles[serialized.name] = [
+        generatedStaticStyles.push({
+          key: serialized.name,
           className,
-          generateStylisCss(`.${className}`, serialized.styles),
-        ];
+          css: generateStylisCss(`.${className}`, serialized.styles),
+        });
       }
     }
 
-    const staticClasses = Object.keys(generatedStaticStyles)
-      .map((key) => generatedStaticStyles[key][0])
+    const staticClasses = generatedStaticStyles
+      .map((style) => style.className)
       .join(' ');
-    const staticStyles = Object.keys(generatedStaticStyles).map((key) => {
+    const staticStyles = generatedStaticStyles.map((style) => {
       return (
-        <style key={key} href={key} precedence="component">
-          {generatedStaticStyles[key][1]}
+        <style key={style.key} href={style.key} precedence="component">
+          {style.css}
         </style>
       );
     });
@@ -137,6 +163,7 @@ function createStyled(tag: ElementType, options?: StyledOptions) {
           })`;
     Styled.__emotion_real = true;
     Styled.__emotion_base = baseTag;
+    Styled.__emotion_styles = styles;
     Styled.__emotion_forwardProp = shouldForwardProp;
 
     Styled.defaultProps = tag.defaultProps;

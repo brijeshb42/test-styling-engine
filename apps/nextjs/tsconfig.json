@@ -1,7 +1,12 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,11 +24,25 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@joy/styled": ["./packages/runtime/src"],
-      "@joy/styled/*": ["./packages/runtime/src/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@joy/styled": [
+        "./packages/runtime/src"
+      ],
+      "@joy/styled/*": [
+        "./packages/runtime/src/*"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "next-env.d.ts",
+    "export/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

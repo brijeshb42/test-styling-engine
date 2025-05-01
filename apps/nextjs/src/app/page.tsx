@@ -1,9 +1,10 @@
-import styled from '@joy/styled';
-
-import styles from './page.module.css';
+import styled from '@brijbyte/styled';
 
 const hoverColor = '#383838';
 
+const T1 = styled('h1', {
+  label: 'T1',
+});
 const Page = styled('div')`
   --gray-rgb: 0, 0, 0;
   --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
@@ -73,6 +74,103 @@ const Main = styled('main')`
   }
 `;
 
+const PrimaryA = styled('a')`
+  && {
+    background: var(--button-primary-hover);
+    color: var(--background);
+    gap: 8px;
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        background: var(--button-primary-hover);
+        border-color: transparent;
+      }
+    }
+  }
+`;
+
+const SecondaryA = styled('a')`
+  && {
+    border-color: var(--gray-alpha-200);
+    min-width: 180px;
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        background: var(--button-secondary-hover);
+        border-color: transparent;
+      }
+    }
+
+    @media (max-width: 600px) {
+      min-width: auto;
+    }
+  }
+`;
+
+const Cta = styled('div')`
+  display: flex;
+  gap: 16px;
+
+  & a {
+    appearance: none;
+    border-radius: 128px;
+    height: 48px;
+    padding: 0 20px;
+    border: none;
+    border: 1px solid transparent;
+    transition:
+      background 0.2s,
+      color 0.2s,
+      border-color 0.2s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 500;
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+
+    & a {
+      font-size: 14px;
+      height: 40px;
+      padding: 0 16px;
+    }
+  }
+`;
+
+const Footer = styled('footer')`
+  grid-row-start: 3;
+  display: flex;
+  gap: 24px;
+
+  & a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  & img {
+    flex-shrink: 0;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    & a:hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+  }
+`;
+
 export default function Home() {
   return (
     <Page id="page">
@@ -84,26 +182,24 @@ export default function Home() {
           <li>Save and see your changes instantly.</li>
         </ol>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
+        <Cta>
+          <PrimaryA
             href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
             target="_blank"
             rel="noopener noreferrer"
           >
             Deploy now
-          </a>
-          <a
+          </PrimaryA>
+          <SecondaryA
             href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
             target="_blank"
             rel="noopener noreferrer"
-            className={styles.secondary}
           >
             Read our docs
-          </a>
-        </div>
+          </SecondaryA>
+        </Cta>
       </Main>
-      <footer className={styles.footer}>
+      <Footer>
         <a
           href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
           target="_blank"
@@ -125,7 +221,7 @@ export default function Home() {
         >
           Go to nextjs.org →
         </a>
-      </footer>
+      </Footer>
     </Page>
   );
 }

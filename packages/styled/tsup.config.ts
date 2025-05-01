@@ -4,4 +4,5 @@ import config from '../../tsup.config';
 export default defineConfig({
   ...config,
   entry: ['src/index.tsx'],
+  noExternal: ['@emotion/styled'],
 });

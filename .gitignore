@@ -3,3 +3,4 @@ dist/
 .next/
 .nx/
 *.tsbuildinfo
+export/

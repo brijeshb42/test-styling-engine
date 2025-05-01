@@ -1,7 +1,10 @@
 {
-  "name": "@joy/styled-preprocessor-stylis",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@brijbyte/styled-preprocessor-stylis",
+  "version": "0.0.1",
+  "description": "A preprocessor for Stylis used by @brijbyte/styled",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "module": "dist/index.mjs",
   "scripts": {
     "build": "tsup --config ../../tsup.config.ts"
   },
@@ -11,7 +14,12 @@
   "devDependencies": {
     "@types/stylis": "^4.2.7"
   },
-  "keywords": [],
+  "keywords": [
+    "stylis",
+    "preprocessor",
+    "css-in-js",
+    "styled-components"
+  ],
   "author": "",
   "license": "MIT",
   "imports": {

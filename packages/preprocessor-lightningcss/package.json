@@ -2,6 +2,7 @@
   "name": "@joy/styled-preprocessor-lightningcss",
   "version": "1.0.0",
   "description": "",
+  "private": true,
   "scripts": {
     "build": "tsup --config ../../tsup.config.ts"
   },

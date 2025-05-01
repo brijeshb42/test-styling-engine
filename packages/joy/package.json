@@ -2,6 +2,7 @@
   "name": "@joy/joy-ui",
   "version": "1.0.0",
   "description": "",
+  "private": true,
   "scripts": {
     "build:esm": "babel src --out-dir dist --extensions .ts,.tsx --out-file-extension .mjs",
     "build:cjs": "babel src --out-dir dist --extensions .ts,.tsx --out-file-extension .js",

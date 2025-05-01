@@ -5,12 +5,12 @@
   "scripts": {
     "clean": "rm -rf .next exports",
     "dev": "next dev --turbo",
-    "build": "next build",
-    "start": "next start",
+    "build": "next build --turbo --profile",
+    "start": "serve -s export",
     "lint": "next lint"
   },
   "dependencies": {
-    "@joy/styled": "workspace:*",
+    "@brijbyte/styled": "workspace:*",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "next": "15.3.1"
@@ -19,6 +19,7 @@
     "typescript": "^5.8.3",
     "@types/node": "^22.14.0",
     "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2"
+    "@types/react-dom": "^19.1.2",
+    "serve": "^14.2.4"
   }
 }

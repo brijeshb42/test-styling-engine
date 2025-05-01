@@ -1,11 +1,10 @@
 {
-  "name": "@joy/styling-engine-context",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@brijbyte/styled-cache",
+  "version": "0.0.1",
+  "description": "A cache for styled components",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "module": "dist/index.mjs",
-  "private": true,
   "scripts": {
     "build": "tsup"
   },
@@ -40,23 +39,25 @@
     ".": {
       "types": "./dist/index.d.ts",
       "react-server": {
-        "import": "./dist/index-server.mjs",
-        "require": "./dist/index-server.js"
+        "import": "./dist/index.server.mjs",
+        "require": "./dist/index.server.js",
+        "default": "./dist/index.server.mjs"
       },
       "default": {
         "import": "./dist/index.mjs",
-        "require": "./dist/index.js"
+        "require": "./dist/index.js",
+        "default": "./dist/index.mjs"
       }
-    },
-    "./getValue": {
-      "types": "./dist/getValue.d.ts",
-      "import": "./dist/getValue.mjs",
-      "default": "./dist/getValue.js"
-    },
-    "./getValueNextjs": {
-      "types": "./dist/getValue.d.ts",
-      "import": "./dist/getValueNextjs.mjs",
-      "default": "./dist/getValueNextjs.js"
     }
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "src",
+    "package.json",
+    "CHANGELOG.md",
+    "README.md"
+  ]
 }
